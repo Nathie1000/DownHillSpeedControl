@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Down Hill Speed Control</string>
+    <string name="speed_title">Speed</string>
+    <string name="speed_summary">The cutoff speed in km/h.</string>
+
+    <string name="time_title">Time</string>
+    <string name="time_summary">The countdown time in seconds.</string>
+
+    <string name="speed_unit">%1$d km/h</string>
+    <string name="time_unit">%1$.1f s</string>
+
+    <string name="permission_denied">Permission denied!</string>
+    <string name="no_signal">No signal</string>
+
+
+</resources>
