@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
@@ -35,10 +37,11 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
 
     private static final int defaultTimePreferenceS = 45;
     private static final int defaultSpeedPreferenceKmh = 80;
+    private static final int defaultSoundVolume = 100;
+    //private static final int defaultSoundDurationMs = 150;
 
     private TextView speedView;
     private TextView timeView;
-    private ValueAnimator speedViewAnimator;
     private ValueAnimator timeViewAnimator;
 
     private LocationManager locationManager;
@@ -63,17 +66,6 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         IsSpeedThresholdExceeded = false;
 
         float largeTextSize = getResources().getDimension(R.dimen.text_large);
-        float smallTextSize = getResources().getDimension(R.dimen.text_small);
-
-        speedViewAnimator = ValueAnimator.ofFloat(largeTextSize, smallTextSize);
-        speedViewAnimator.setDuration(animationTimeMs);
-        speedViewAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float animatedValue = (float) valueAnimator.getAnimatedValue();
-                speedView.setTextSize(TypedValue.COMPLEX_UNIT_PX, animatedValue);
-            }
-        });
 
         timeViewAnimator = ValueAnimator.ofFloat(0, largeTextSize);
         timeViewAnimator.setDuration(animationTimeMs);
@@ -135,8 +127,8 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsUpdateTimeMs, 0, this);
             lastKnowTimeMs = uptimeMillis();
         }
@@ -183,18 +175,21 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         if (speedKmh > speedThresholdKmh && !IsSpeedThresholdExceeded) {
             IsSpeedThresholdExceeded = true;
             timeView.setVisibility(View.VISIBLE);
-            speedViewAnimator.start();
             timeViewAnimator.start();
             countDownTimer.start();
+            // Get the volume of the notification sound.
+            int soundVolume = sharedPref.getInt(SettingsActivity.KEY_SOUND_VOLUME, defaultSoundVolume);
+            // Play notification sound.
+            ToneGenerator toneGen = new ToneGenerator(AudioManager.STREAM_MUSIC, soundVolume);
+            toneGen.startTone(ToneGenerator.TONE_CDMA_PIP);
         }
         else if (speedKmh <= speedThresholdKmh && IsSpeedThresholdExceeded) {
             IsSpeedThresholdExceeded = false;
-            speedViewAnimator.reverse();
             timeViewAnimator.reverse();
             timeViewAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    timeView.setVisibility(View.GONE);
+                    timeView.setVisibility(View.INVISIBLE);
                     timeViewAnimator.removeListener(this);
                 }
             });
@@ -211,7 +206,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
     }
 
     @Override
-    public void onProviderEnabled(String s){
+    public void onProviderEnabled(String s) {
 
     }
 

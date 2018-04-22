@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 public class SettingsActivity extends AppCompatActivity {
     public static final String KEY_SPEED = "speed";
     public static final String KEY_TIME = "time";
+    public static final String KEY_SOUND_VOLUME = "volume";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

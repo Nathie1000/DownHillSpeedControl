@@ -3,6 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/settings"
         android:icon="@android:drawable/ic_menu_preferences"
-        android:title="Settigs"
+        android:title="@string/settings_title"
         app:showAsAction="always" />
 </menu>

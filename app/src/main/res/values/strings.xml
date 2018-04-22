@@ -1,16 +1,29 @@
 <resources>
+    <!--Application-->
     <string name="app_name">Down Hill Speed Control</string>
-    <string name="speed_title">Speed</string>
-    <string name="speed_summary">The cutoff speed in km/h.</string>
-
-    <string name="time_title">Time</string>
-    <string name="time_summary">The countdown time in seconds.</string>
 
     <string name="speed_unit">%1$d km/h</string>
-    <string name="time_unit">%1$.1f s</string>
+    <string name="time_unit">%1$.1f</string>
 
     <string name="permission_denied">Permission denied!</string>
     <string name="no_signal">No signal</string>
 
+    <!--Menu-->
+    <string name="settings_title">Settings</string>
+
+    <!--Settings-->
+    <string name="speed_title">Speed</string>
+    <string name="speed_summary">The speed limit in km/h.</string>
+
+    <string name="time_title">Time</string>
+    <string name="time_summary">The countdown time in seconds.</string>
+
+    <string name="sound_title">Notification sound</string>
+
+    <string name="volume_title">Volume</string>
+    <string name="volume_summary">The volume of notifications in %.</string>
+
+    <string name="duration_title">Duration</string>
+    <string name="duration_summary">The duration of notifications in milliseconds.</string>
 
 </resources>

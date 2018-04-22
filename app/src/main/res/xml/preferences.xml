@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <com.nathan.downhillspeedcontrol.IntegerEditTextPreference
-        android:key="speed"
-        android:title="@string/speed_title"
-        android:summary="@string/speed_summary"
         android:defaultValue="80"
-        android:numeric="integer"
         android:inputType="number"
-        />
+        android:key="speed"
+        android:numeric="integer"
+        android:summary="@string/speed_summary"
+        android:title="@string/speed_title" />
     <com.nathan.downhillspeedcontrol.IntegerEditTextPreference
-        android:key="time"
-        android:title="@string/time_title"
-        android:summary="@string/time_summary"
         android:defaultValue="45"
-        android:numeric="integer"
         android:inputType="number"
-        />
-
+        android:key="time"
+        android:numeric="integer"
+        android:summary="@string/time_summary"
+        android:title="@string/time_title" />
+    <PreferenceCategory android:title="@string/sound_title">
+        <com.nathan.downhillspeedcontrol.IntegerEditTextPreference
+            android:defaultValue="100"
+            android:inputType="number"
+            android:key="volume"
+            android:numeric="integer"
+            android:summary="@string/volume_summary"
+            android:title="@string/volume_title" />
+    </PreferenceCategory>
 </PreferenceScreen>
