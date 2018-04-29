@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Down Hill Speed Control</string>
+    <string name="permission_denied">Geen toestemming!</string>
+    <string name="no_signal">Geen signaal</string>
+    <string name="settings_title">Instellingen</string>
+    <string name="speed_title">"Snelheid "</string>
+    <string name="speed_summary">De snelheidslimiet in km/h.</string>
+    <string name="time_title">Tijd</string>
+    <string name="time_summary">De afteltijd in seconden.</string>
+    <string name="sound_title">"Notificatie geluid "</string>
+    <string name="volume_title">Volume</string>
+    <string name="volume_summary">Het volume van de meldingen in%.</string>
+    <string name="duration_title">"Looptijd "</string>
+    <string name="duration_summary">De duur van meldingen in milliseconden.</string>
+</resources>

@@ -167,6 +167,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         // Get the average speed and convert is from ms/s to km/h
         int speedKmh = Math.round(calcAvgFromList(speeds) * 3.6f);
         speedView.setText(getResources().getString(R.string.speed_unit, speedKmh));
+        speedView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_medium));
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         // Get the speed threshold from settings. This should already be in km/h

@@ -2,8 +2,8 @@
     <!--Application-->
     <string name="app_name">Down Hill Speed Control</string>
 
-    <string name="speed_unit">%1$d km/h</string>
-    <string name="time_unit">%1$.1f</string>
+    <string name="speed_unit" translatable="false">%1$d km/h</string>
+    <string name="time_unit" translatable="false">%1$.1f</string>
 
     <string name="permission_denied">Permission denied!</string>
     <string name="no_signal">No signal</string>
