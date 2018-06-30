@@ -2,5 +2,9 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorNightPrimary">#303d87</color>
+    <color name="colorNightPrimaryDark">#252f68</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorTextLight">#FFFFFF</color>
+    <color name="colorTextDark">#000000</color>
 </resources>

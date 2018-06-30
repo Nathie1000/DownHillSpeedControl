@@ -7,6 +7,8 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,9 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
-
 import static android.os.SystemClock.uptimeMillis;
 
 public class DisplayActivity extends AppCompatActivity implements LocationListener {
@@ -39,6 +39,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
     private static final int defaultSpeedPreferenceKmh = 80;
     private static final int defaultSoundVolume = 100;
     //private static final int defaultSoundDurationMs = 150;
+    public static final boolean defaultNightMode = false;
 
     private TextView speedView;
     private TextView timeView;
@@ -50,10 +51,15 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
     private Location lastKnowLocation;
     private long lastKnowTimeMs;
     private ArrayList<Float> speeds;
-    private boolean IsSpeedThresholdExceeded;
+    private boolean isSpeedThresholdExceeded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isNightMode = sharedPref.getBoolean(SettingsActivity.KEY_NIGHT_MODE, defaultNightMode);
+        if (isNightMode) {
+            setTheme(R.style.DarkTheme);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
 
@@ -63,7 +69,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         lastKnowLocation = null;
         lastKnowTimeMs = 0;
         speeds = new ArrayList<>();
-        IsSpeedThresholdExceeded = false;
+        isSpeedThresholdExceeded = false;
 
         float largeTextSize = getResources().getDimension(R.dimen.text_large);
 
@@ -77,7 +83,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
             }
         });
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
         // The countdown time form settings and covert it to milliseconds.
         int countDownTimeMs = sharedPref.getInt(SettingsActivity.KEY_TIME, defaultTimePreferenceS) * 1000;
         countDownTimer = new CountDownTimer(countDownTimeMs, countDownIntervalMs) {
@@ -96,6 +102,11 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
+        // Night mode icon.
+        menu.getItem(0).getIcon().mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        // Settings icon.
+        menu.getItem(1).getIcon().mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+
         return true;
     }
 
@@ -104,6 +115,17 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         if (item.getItemId() == R.id.settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
+            return true;
+        }
+        else if (item.getItemId() == R.id.night_mode) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            // Get the current night mode and inverse it.
+            boolean isNightMode = !sharedPref.getBoolean(SettingsActivity.KEY_NIGHT_MODE, defaultNightMode);
+            // Rewrite the inverted mode back to settings.
+            sharedPref.edit().putBoolean(SettingsActivity.KEY_NIGHT_MODE, isNightMode).apply();
+            // Recreate windows in order to display new theme.
+            recreate();
+
             return true;
         }
         else {
@@ -173,8 +195,8 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         // Get the speed threshold from settings. This should already be in km/h
         int speedThresholdKmh = sharedPref.getInt(SettingsActivity.KEY_SPEED, defaultSpeedPreferenceKmh);
 
-        if (speedKmh > speedThresholdKmh && !IsSpeedThresholdExceeded) {
-            IsSpeedThresholdExceeded = true;
+        if (speedKmh > speedThresholdKmh && !isSpeedThresholdExceeded) {
+            isSpeedThresholdExceeded = true;
             timeView.setVisibility(View.VISIBLE);
             timeViewAnimator.start();
             countDownTimer.start();
@@ -184,8 +206,8 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
             ToneGenerator toneGen = new ToneGenerator(AudioManager.STREAM_MUSIC, soundVolume);
             toneGen.startTone(ToneGenerator.TONE_CDMA_PIP);
         }
-        else if (speedKmh <= speedThresholdKmh && IsSpeedThresholdExceeded) {
-            IsSpeedThresholdExceeded = false;
+        else if (speedKmh <= speedThresholdKmh && isSpeedThresholdExceeded) {
+            isSpeedThresholdExceeded = false;
             timeViewAnimator.reverse();
             timeViewAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
