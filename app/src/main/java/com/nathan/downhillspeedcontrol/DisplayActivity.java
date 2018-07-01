@@ -32,8 +32,9 @@ import static android.os.SystemClock.uptimeMillis;
 public class DisplayActivity extends AppCompatActivity implements LocationListener {
     private static final int animationTimeMs = 600;
     private static final int gpsUpdateTimeMs = 500;
-    private static final int numberOfSpeedSamples = 3;
+    private static final int numberOfSpeedSamples = 10;
     private static final int countDownIntervalMs = 100;
+    public static final int maxThresholdExceededCount = 3;
 
     private static final int defaultTimePreferenceS = 45;
     private static final int defaultSpeedPreferenceKmh = 80;
@@ -46,12 +47,13 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
     private ValueAnimator timeViewAnimator;
 
     private LocationManager locationManager;
-    private CountDownTimer countDownTimer;
+    private InfiniteCountDownTimer countDownTimer;
 
     private Location lastKnowLocation;
     private long lastKnowTimeMs;
     private ArrayList<Float> speeds;
     private boolean isSpeedThresholdExceeded;
+    private int thresholdExceededCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         if (isNightMode) {
             setTheme(R.style.DarkTheme);
         }
+        // Note: that setTheme() needs to be called before setContentView().
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
 
@@ -70,6 +73,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         lastKnowTimeMs = 0;
         speeds = new ArrayList<>();
         isSpeedThresholdExceeded = false;
+        thresholdExceededCount = 0;
 
         float largeTextSize = getResources().getDimension(R.dimen.text_large);
 
@@ -86,15 +90,10 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
 
         // The countdown time form settings and covert it to milliseconds.
         int countDownTimeMs = sharedPref.getInt(SettingsActivity.KEY_TIME, defaultTimePreferenceS) * 1000;
-        countDownTimer = new CountDownTimer(countDownTimeMs, countDownIntervalMs) {
+        countDownTimer = new InfiniteCountDownTimer(countDownTimeMs, countDownIntervalMs) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timeView.setText(getResources().getString(R.string.time_unit, millisUntilFinished / 1000.0f));
-            }
-
-            @Override
-            public void onFinish() {
-                timeView.setText(getResources().getString(R.string.time_unit, 0.0f));
             }
         };
     }
@@ -188,6 +187,7 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
 
         // Get the average speed and convert is from ms/s to km/h
         int speedKmh = Math.round(calcAvgFromList(speeds) * 3.6f);
+
         speedView.setText(getResources().getString(R.string.speed_unit, speedKmh));
         speedView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_medium));
 
@@ -195,7 +195,17 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
         // Get the speed threshold from settings. This should already be in km/h
         int speedThresholdKmh = sharedPref.getInt(SettingsActivity.KEY_SPEED, defaultSpeedPreferenceKmh);
 
-        if (speedKmh > speedThresholdKmh && !isSpeedThresholdExceeded) {
+        if (speedKmh > speedThresholdKmh) {
+            thresholdExceededCount++;
+            thresholdExceededCount = Math.min(thresholdExceededCount, maxThresholdExceededCount);
+        }
+        else {
+            thresholdExceededCount--;
+            thresholdExceededCount = Math.max(thresholdExceededCount, 0);
+        }
+
+        // Check if we need to start the countdown timer.
+        if (speedKmh > speedThresholdKmh && !isSpeedThresholdExceeded && thresholdExceededCount >= maxThresholdExceededCount) {
             isSpeedThresholdExceeded = true;
             timeView.setVisibility(View.VISIBLE);
             timeViewAnimator.start();
@@ -206,7 +216,8 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
             ToneGenerator toneGen = new ToneGenerator(AudioManager.STREAM_MUSIC, soundVolume);
             toneGen.startTone(ToneGenerator.TONE_CDMA_PIP);
         }
-        else if (speedKmh <= speedThresholdKmh && isSpeedThresholdExceeded) {
+        // Check if we need to stop the countdown timer.
+        else if (speedKmh <= speedThresholdKmh && isSpeedThresholdExceeded && thresholdExceededCount == 0) {
             isSpeedThresholdExceeded = false;
             timeViewAnimator.reverse();
             timeViewAnimator.addListener(new AnimatorListenerAdapter() {
@@ -230,12 +241,10 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
 
     @Override
     public void onProviderEnabled(String s) {
-
     }
 
     @Override
     public void onProviderDisabled(String s) {
-
     }
 
     private float calcAvgFromList(ArrayList<Float> list) {
