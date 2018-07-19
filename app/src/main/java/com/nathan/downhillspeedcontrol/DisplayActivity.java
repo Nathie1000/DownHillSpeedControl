@@ -166,6 +166,9 @@ public class DisplayActivity extends AppCompatActivity implements LocationListen
 
     @Override
     public void onLocationChanged(Location location) {
+        // Don't update if location is not valid.
+        if (location == null) return;
+
         // To avoid nullptr take current location as last known location if last known location is unknown.
         if (lastKnowLocation == null) {
             lastKnowLocation = location;
