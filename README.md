@@ -1,2 +1,2 @@
 # DownHillSpeedControl
-App for Moba truckers.
+App for truckers.
